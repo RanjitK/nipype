@@ -18,7 +18,7 @@ from string import Template
 import select
 import subprocess
 from textwrap import wrap
-from time import time
+from time import time, asctime
 from warnings import warn
 
 from .traits_extension import (traits, Undefined, TraitDictObject,
@@ -583,6 +583,10 @@ class Interface(object):
         """ Initializes outputs"""
         raise NotImplementedError
 
+    @property
+    def version(self):
+        raise NotImplementedError
+
     def run(self):
         """Execute the command."""
         raise NotImplementedError
@@ -632,6 +636,7 @@ class BaseInterface(Interface):
             raise Exception('No input_spec in class: %s' % \
                                 self.__class__.__name__)
         self.inputs = self.input_spec(**inputs)
+        self._version = 'Unknown'
 
     @classmethod
     def help(cls, returnhelp=False):
@@ -744,6 +749,11 @@ class BaseInterface(Interface):
                              copy=spec.copyfile))
         return info
 
+    @property
+    def version(self):
+        return self._version
+
+
     def _check_requires(self, spec, name, value):
         """ check if required inputs are satisfied
         """
@@ -814,6 +824,7 @@ class BaseInterface(Interface):
                         returncode=None,
                         duration=None,
                         environ=env,
+                        datetime=asctime(),
                         hostname=gethostname())
         t = time()
         try:
