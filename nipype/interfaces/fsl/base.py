@@ -113,7 +113,8 @@ class Info(object):
         try:
             return os.environ['FSLOUTPUTTYPE']
         except KeyError:
-            warnings.warn('FSL environment variables not set. setting output type to NIFTI')
+            warnings.warn(('FSL environment variables not set. setting output '
+                           'type to NIFTI'))
             return 'NIFTI'
 
     @staticmethod
@@ -188,11 +189,9 @@ class FSLCommand(CommandLine):
         else:
             raise AttributeError('Invalid FSL output_type: %s' % output_type)
 
-
     @property
     def version(self):
         return Info.version()
-
 
     def _gen_fname(self, basename, cwd=None, suffix=None, change_ext=True,
                    ext=None):
