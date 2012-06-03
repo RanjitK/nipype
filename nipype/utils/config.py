@@ -32,6 +32,7 @@ log_rotate = 4
 [execution]
 create_report = true
 crashdump_dir = %s
+display_variable = :1
 hash_method = timestamp
 job_finished_timeout = 5
 keep_inputs = false
@@ -62,9 +63,18 @@ class NipypeConfig(object):
         new_config_file = os.path.join(config_dir, 'nipype.cfg')
         # To be deprecated in two releases
         if os.path.exists(old_config_file):
-            warn("Moving old config file from: %s to %s" % (old_config_file,
-                                                            new_config_file))
-            shutil.move(old_config_file, new_config_file)
+            if os.path.exists(new_config_file):
+                msg=("Detected presence of both old (%s, used by versions "
+                     "< 0.5.2) and new (%s) config files.  This version will "
+                     "proceed with the new one. We advise to merge settings "
+                     "and remove old config file if you are not planning to "
+                     "use previous releases of nipype.") % (old_config_file,
+                                                            new_config_file)
+                warn(msg)
+            else:
+                warn("Moving old config file from: %s to %s" % (old_config_file,
+                                                                new_config_file))
+                shutil.move(old_config_file, new_config_file)
         self.data_file = os.path.join(config_dir, 'nipype.json')
         self._config.readfp(StringIO(default_cfg))
         self._config.read([new_config_file, old_config_file, 'nipype.cfg'])
@@ -132,3 +142,7 @@ class NipypeConfig(object):
                 for key, val in config_dict[section].items():
                     if not key.startswith('__'):
                         self._config.set(section, key, str(val))
+
+    def update_matplotlib(self):
+        import matplotlib
+        matplotlib.use(self.get('execution', 'matplotlib_backend'))

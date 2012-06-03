@@ -102,7 +102,8 @@ class SliceTiming(SPMCommand):
                     run.append(fname_presuffix(inner_f,
                                                prefix=self.inputs.out_prefix))
             else:
-                realigned_run = fname_presuffix(f, prefix='a')
+                realigned_run = fname_presuffix(f, 
+                                                prefix=self.inputs.out_prefix)
             outputs['timecorrected_files'].append(realigned_run)
         return outputs
 
@@ -784,8 +785,8 @@ class Smooth(SPMCommand):
                     return [val[0], val[0], val[0]]
                 else:
                     return val
-            if opt == 'implicit_masking':
-                return int(val)
+        if opt == 'implicit_masking':
+            return int(val)
 
         return val
 
@@ -871,7 +872,7 @@ class DARTEL(SPMCommand):
                 new_param['slam'] = param[3]
                 params.append(new_param)
             return params
-        elif opt == 'optimization parameters':
+        elif opt == 'optimization_parameters':
             new_param = {}
             new_param['lmreg'] = val[0]
             new_param['cyc'] = val[1]
@@ -916,7 +917,7 @@ class DARTELNorm2MNIInputSpec(SPMCommandInputSpec):
                                 field='mni_norm.bb')
     modulate = traits.Bool(field='mni_norm.preserve',
                            desc="Modulate out images - no modulation preserves concentrations")
-    fwhm = traits.Either(traits.Tuple(traits.Float(), traits.Float, traits.Float),
+    fwhm = traits.Either(traits.List(traits.Float(), minlen=3, maxlen=3),
                          traits.Float(), field='mni_norm.fwhm',
                          desc='3-list of fwhm for each dimension')
 
@@ -960,10 +961,10 @@ class DARTELNorm2MNI(SPMCommand):
         elif opt == 'bounding_box':
             return list(val)
         elif opt == 'fwhm':
-            if not isinstance(val, tuple):
-                return [val, val, val]
-            if isinstance(val, tuple):
+            if isinstance(val, list):
                 return val
+            else:
+                return [val, val, val]
         elif opt == 'modulate':
             return int(val)
         else:
